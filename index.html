@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>飞溅运动</title>
+</head>
+
+<body>
+    <canvas id="can" style="border:solid #FF9800 1px"></canvas>
+    <script>
+        const c = document.getElementById("can");
+        const ctx = c.getContext("2d");
+        //重力加速度
+        const G = 9.8;
+        //画板的宽和高
+        const VIEW_WIDTH = 1000;
+        const VIEW_HEIGHT = 500;
+        //时钟运转的周期
+        const t = 50 / 1000;
+        c.width = VIEW_WIDTH;
+        c.height = VIEW_HEIGHT;
+        let dataMap = new Map();
+        //全局所需要的初始化变量
+        const init = () => {
+            for (let i = 0; i < 10; i++) {
+                let p = {};
+                p.x = VIEW_WIDTH / 2;
+                p.y = 100;
+                p.inity = 100;
+                p.initx = VIEW_WIDTH / 2;
+                //初速度
+                p.v0 = Math.round(Math.random() * 10);
+                //初始化的夹角
+                p.angle = Math.round(Math.random() * 360);
+                p.vx = p.v0 * Math.cos(p.angle / 180 * Math.PI);
+                p.vy = p.v0 * Math.sin(p.angle / 180 * Math.PI);
+                p.vychange = p.vy;
+                p.tx = 0;
+                p.ty = 0;
+                dataMap.set(`fly${i}`, p);
+            }
+        }
+        init();
+        //将初始化的点 绘制进canvas
+        const draw = (a, b) => {
+            ctx.fillStyle = "blue";
+            ctx.beginPath();
+            ctx.arc(a, b, 3, 0, Math.PI * 2, true);
+            ctx.closePath();
+            ctx.fill();
+        }
+        //动态的绘制
+        const redraw = (fly) => {
+            console.log(fly);
+            fly.tx += t;
+            fly.ty += t;
+            fly.y = fly.inity + (fly.vy * fly.ty + 1 / 2 * G * fly.ty * fly.ty);
+            fly.x = fly.initx + fly.vx * fly.tx;
+            fly.vychange = fly.vy + G * fly.ty;
+            if (fly.x > VIEW_WIDTH || fly.y > VIEW_HEIGHT) {
+                fly.ty = 0;
+                fly.y = VIEW_HEIGHT;
+                //模拟空气的阻力
+                fly.vy = -0.75 * fly.vychange;
+                fly.inity = fly.y;
+                draw(fly.x, fly.y);
+                clearInterval(f);
+            }else{
+                draw(fly.x, fly.y);
+            }
+           
+        }
+        setInterval(function () {
+            for (let i = 0; i < 10; i++) {
+                const item = dataMap.get(`fly${i}`);
+                redraw(item);
+            }
+        }, 50);
+    </script>
+</body>
+
+</html>
